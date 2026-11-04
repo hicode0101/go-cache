@@ -119,16 +119,3 @@ go-cache 的方案：
 5. **CleanupInterval**：默认 1 分钟是“兜底上限”，不是清理延迟；真正决定清理及时性的是堆顶 + 精确唤醒。除非要省极多的定时器唤醒，不建议调小。
 6. **Close**：进程常驻缓存可不调用（有 finalizer 兜底停 janitor）；热重建场景（如配置热更新）请显式 `Close()`。
 
-## 9. 复现方式
-
-```bash
-cd go-cache
-go test -count=1 .                          # 单元测试
-CGO_ENABLED=1 go test -race -count=3 .      # 竞态检测（需 C 编译器）
-go test -run '^$' -bench . -benchmem -count=1 .   # 全部基准（含与 cache2go 对比）
-go test -run '^$' -bench 'BenchmarkCompare' -benchmem .  # 仅对比基准
-```
-
-对比基准依赖 `go.mod` 中的本地 `replace` 指令指向同目录下的 cache2go 检出副本，无需网络。
-
-> 注：按“代码中不再提及 cache2go”的要求，对比基准文件 `compare_bench_test.go` 与 `go.mod` 的 replace 指令已从代码中移除；上方最后两条对比命令需恢复它们后才能运行，其余数据均可直接复现。
